@@ -1,0 +1,5 @@
+[0mGET /users [32m200 [0m14.476 ms - 153[0m
+[0mGET /favicon.ico [33m404 [0m2.018 ms - 154[0m
+::ffff:127.0.0.1 - - [18/Oct/2019:06:52:48 +0000] "GET /users HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+::ffff:127.0.0.1 - - [18/Oct/2019:06:53:16 +0000] "GET / HTTP/1.1" 302 54 "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+::ffff:127.0.0.1 - - [18/Oct/2019:06:53:16 +0000] "GET /home HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
