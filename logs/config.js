@@ -1,6 +1,22 @@
-const logger = require('morgan');
+const log4js = require('log4js');
 const fs = require('fs');
 const path = require('path');
-const accessLogStream = fs.createWriteStream(path.join(__dirname, './access.log'), {flags: 'a'});
+const logPath = path.join(__dirname, './');
 
-module.exports = {'logger': logger, 'als': accessLogStream}
+log4js.configure({
+ appenders: {
+ 	std: {type: 'console'},
+ 	httpLog: { type: "dateFile", filename: logPath + 'info.log', pattern: 'yyyyMMdd', alwaysIncludePattern: true, keepFileExt: true, flags: 'a'},
+ 	errorLog: {type: 'dateFile', filename: logPath + 'error.log', pattern: 'yyyyMMdd', alwaysIncludePattern: true, keepFileExt: true, flags: 'a'},
+ 	error: {type: "logLevelFilter", level: "error", appender: 'errorLog'}
+
+ },
+ categories: {
+ 	default: {appenders: ['std'], level: 'all'},
+ 	http: {appenders: ['httpLog', 'error'], level: 'info'}
+ }
+});
+
+module.exports = log4js;
+
+

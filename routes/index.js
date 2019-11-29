@@ -4,6 +4,7 @@ function routers(app) {
   })
   app.use('/users', require('./users'))
   app.use('/home', require('./home'))
+  app.use('/wx', require('../config/wx/wx'))
 
   /**
    * [404 page handle]

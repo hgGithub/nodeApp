@@ -4,17 +4,19 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "set NODE_ENV=development && node ./bin/www && echo \"Development environment running\"\n",
+    "dev": "node ./bin/www && echo \"Development environment running\"\n",
     "prod": "set NODE_ENV=production && node ./bin/www && echo \"production environment running\"\n",
     "test": "set NODE_ENV=test && node ./bin/www && echo \"test environment running\"\n"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
+    "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "ejs": "^2.7.1",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "log4js": "^6.1.0",
     "morgan": "~1.9.1"
   },
   "devDependencies": {
