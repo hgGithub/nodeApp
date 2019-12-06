@@ -1,0 +1,14 @@
+1. node 日志输出 log4Js
+2. express服务启动，express与nginx关系。
+3.中途岛练习。
+4.前端与node的集成。
+5.后台框架的使用。
+6.API接口的暴露
+7.element-UI实操
+8.数据库连接
+9.egg.js应用
+10.公众号
+11.小程序
+12.mock
+13.ES10
+14.nginx配置了解

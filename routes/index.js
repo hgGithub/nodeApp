@@ -4,7 +4,20 @@ function routers(app) {
   })
   app.use('/users', require('./users'))
   app.use('/home', require('./home'))
-  app.use('/wx', require('../config/wx/wx'))
+  app.use('/wx', require('../config/wx/serverAuth'))
+  app.use('/getName', require('../interface/getName'))
+  // app.use('/recmsg', require('../common/recmsg'))
+
+  app.post('/recmsg', function (req, res, next) {
+    console.log('req.body: ',req.body);
+    req.on('data', function(chunk) {
+      console.log('111: ',req.body);
+      req.rawBody += chunk;
+    });
+    req.on('end', function() {
+      res.send(req.body);
+    });
+});
 
   /**
    * [404 page handle]

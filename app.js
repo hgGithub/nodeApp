@@ -14,15 +14,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 const curentEnvironment = process.env.NODE_ENV || 'development';
-let logger = undefined;
+global.logger = undefined;
 if('development' === curentEnvironment) {
-	logger = logs.getLogger('default');
+	global.logger = logs.getLogger('default');
 } else {
-	logger = logs.getLogger('http');
+	global.logger = logs.getLogger('http');
 }
 
 // 接入日志组件
-app.use(logs.connectLogger(logger));
+app.use(logs.connectLogger(global.logger));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -35,7 +35,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-	logger.error('Something happened: ', err);
+	global.logger.error('Something happened: ', err);
 	logs.shutdown();
   // set locals, only providing error in development
   res.locals.message = err.message;

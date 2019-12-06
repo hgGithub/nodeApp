@@ -1,3 +1,7 @@
+/**
+ * 微信验证服务器是否为自己的服务器
+ * 
+ */
 const crypto =  require('crypto'), //引入加密模块
 	  express = require('express'),
 	  router = express.Router();
@@ -5,8 +9,8 @@ const crypto =  require('crypto'), //引入加密模块
 router.get('/', (req, res, next) => {
 	//1.获取微信服务器Get请求的参数 signature、timestamp、nonce、echostr
     const signature = req.query.signature,		//微信加密签名
-        timestamp = req.query.timestamp,		//时间戳
-            nonce = req.query.nonce,			//随机数
+          timestamp = req.query.timestamp,		//时间戳
+          nonce = req.query.nonce,				//随机数
           echostr = req.query.echostr,			//随机字符串
           token = "nmhgapp";
 
