@@ -6,7 +6,7 @@ function routers(app) {
   app.use('/home', require('./home'))
   app.use('/wx', require('../config/wx/serverAuth'))
   app.use('/getName', require('../interface/getName'))
-  // app.use('/recmsg', require('../common/recmsg'))
+  app.use('/recmsg', require('../common/recmsg'))
 
   app.post('/recmsg', function (req, res, next) {
     console.log('req.body: ',req.body);

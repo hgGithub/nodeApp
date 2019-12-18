@@ -2,10 +2,11 @@ let http = require('http');
 let https = require('https');
 let envId = require('../config/wx/envConfig');
 let token = require('./token');
-
+console.log('appod: ' + envId.appid);
 let getAccessToken = () => {
-	let curTimeStamp = new Date();
-	if(token.timeStamp || token.timeStamp > curTimeStamp) {
+	let curTimeStamp = Date.parse(new Date());
+	if(!token.token.timeStamp || token.token.timeStamp > curTimeStamp) {
+		console.log(token.timeStamp + ' : ' + curTimeStamp);
 		return true;
 	}
 	console.log('get token');
@@ -33,9 +34,10 @@ let getAccessToken = () => {
 	    	if(data.errcode) { // 更新token及存储时间
 	    		console.log("data.errmsg: ", data.errmsg);
 	    	} else {
-	    		token.token = data.access_token;
-	    		token.timeStamp = (Date.parse(new Date()) + 5400000);
-	    		console.log(token.token, token.timeStamp);
+	    		token.token.token = data.access_token;
+	    		token.token.timeStamp = (Date.parse(new Date()) + 5400000);
+	    		console.log('token: ', token.token.token, token.token.timeStamp);
+	    		getApiTicket();
 	    	}
 
 	    }).on('end', function(){
@@ -43,6 +45,42 @@ let getAccessToken = () => {
 	    });
 	}).on('error', function(e) {
 	    console.log("error: " + e.message);
+	})
+
+	req.end();
+}
+
+let getApiTicket = () => {
+	let path = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + token.token.token + '&type=jsapi';
+	let opt = {
+		host: 'api.weixin.qq.com',
+		port: 443,
+		path: path,
+		method: 'GET'
+	    // headers:{
+	    //     "Content-Type": 'application/x-www-form-urlencoded'，
+	    //     'Content-Length': Buffer.byteLength(postData)
+	    // }
+	}
+
+	let resData = {};
+	let req = https.request(opt, function(res) {
+	    console.log("response: " + res.statusCode);
+	    res.setEncoding('utf8');
+	    res.on('data',function(data){
+	    	data = JSON.parse(data);
+	    	if(!data.errcode) { // success
+	    		token.jsapiTicket.jsapiTicket = data.ticket;
+	    		console.log('apiticket: ' + data.ticket);
+	    	} else {
+	    		console.log(data.errmsg);
+	    	}
+
+	    }).on('end', function(){
+	        console.log('api ticket request end!')
+	    });
+	}).on('error', function(e) {
+	    console.log("api ticket request error: " + e.message);
 	})
 
 	req.end();

@@ -3,8 +3,8 @@ const CUR_ENV = process.env.NODE_ENV || 'development';
 const test_appid = 'wx1cb1b46245171b2e',
 		test_appscret = 'aa7a181b07e0d748c68baa84119439dc';
 
-const dev_appid = 'wx8aa796383a66c9aa',
-		dev_appscret = '';
+const dev_appid = 'wx1cb1b46245171b2e', // wx8aa796383a66c9aa
+		dev_appscret = 'aa7a181b07e0d748c68baa84119439dc';
 
 let appid, appscret;
 if(CUR_ENV === 'development') {

@@ -3,8 +3,29 @@
 <head>
 	<meta charset="UTF-8">
 	<title>HOME</title>
+	<script type="text/javascript" src="/javascripts/jweixin-1.4.0.js"></script>
+	<script type="text/javascript" src="/javascripts/wxconfig.js"></script>
 </head>
 <body>
 	<p>This is index page!</p>
+
+	<script type="text/javascript">
+		wx.ready(function() {
+			alert('this is a share!');
+			console.log('wx config successful!');
+			wx.updateAppMessageShareData({
+			    title: '测试', // 分享标题
+			    desc: '正在测试分享', // 分享描述
+			    link: 'http://10.8.66.22:3000/users', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+			    imgUrl: '../public/images/108.108.png', // 分享图标
+			    success: function () {
+			      alert('分享成功');
+			    }
+			  })
+		});
+		wx.error(function(res) {
+			console.log('wx config error!');
+		});
+	</script>
 </body>
 </html>

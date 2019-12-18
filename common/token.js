@@ -1,6 +1,10 @@
 let token = {
-	token: '28_xqBtOi4Ft6LKEbvrBIuayIvLCv_lEiwxlGDbTtP9BjlDNGDiQjeg0v9afvBizHzfJC2f3oGR_LtoJ0TM1xShIsixvFmiPkKMp098IVzVfiJzU-1mOsTdDFOJCpU6LZRqAur2Z3sq9BsT4K4xIGMfACAAYE',
-	timeStamp: 1575537377000
+	token: '28_EhJG7COo0rgNstYaRG9pluDkI1od_ikRwibmNp371C8b99PQBTf0aahOYPfU4DNgYjadV9_suWdh_6YW1T0K-YjBmbC2aBfwvgwA850oBq__zB-4drDLI0WdGmZmbZdxaMjoT1gf3cUAXlGWNEMeADAGXF',
+	timeStamp: 1576666426000
 }
 
-module.exports = token;
+let jsapiTicket = {
+	jsapiTicket:'LIKLckvwlJT9cWIhEQTwfIBpeD8KdUMr0o7r26ur2JYMRFDIepRcm-wwb52Fr23oWdRIZQk4IkdW960-NWtlpw'
+}
+
+module.exports = {token, jsapiTicket};
