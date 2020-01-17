@@ -2,11 +2,11 @@ let http = require('http');
 let https = require('https');
 let envId = require('../config/wx/envConfig');
 let token = require('./token');
-console.log('appod: ' + envId.appid);
+console.log('appid: ' + envId.appid);
 let getAccessToken = () => {
 	let curTimeStamp = Date.parse(new Date());
-	if(!token.token.timeStamp || token.token.timeStamp > curTimeStamp) {
-		console.log(token.timeStamp + ' : ' + curTimeStamp);
+	if(token.token.timeStamp && token.token.timeStamp > curTimeStamp) {
+		console.log(token.token.timeStamp + ' : ' + curTimeStamp);
 		return true;
 	}
 	console.log('get token');
@@ -37,7 +37,7 @@ let getAccessToken = () => {
 	    		token.token.token = data.access_token;
 	    		token.token.timeStamp = (Date.parse(new Date()) + 5400000);
 	    		console.log('token: ', token.token.token, token.token.timeStamp);
-	    		getApiTicket();
+	    		getApiTicket(token.token.token);
 	    	}
 
 	    }).on('end', function(){
@@ -50,8 +50,8 @@ let getAccessToken = () => {
 	req.end();
 }
 
-let getApiTicket = () => {
-	let path = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + token.token.token + '&type=jsapi';
+let getApiTicket = (nowToken) => {
+	let path = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=' + nowToken + '&type=jsapi';
 	let opt = {
 		host: 'api.weixin.qq.com',
 		port: 443,
@@ -71,7 +71,7 @@ let getApiTicket = () => {
 	    	data = JSON.parse(data);
 	    	if(!data.errcode) { // success
 	    		token.jsapiTicket.jsapiTicket = data.ticket;
-	    		console.log('apiticket: ' + data.ticket);
+	    		console.log('jsapiTicket: ' + data.ticket);
 	    	} else {
 	    		console.log(data.errmsg);
 	    	}

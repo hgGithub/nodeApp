@@ -1,4 +1,4 @@
-1. node 日志输出 log4Js
+1. node 日志输出 log4Js（Done）
 2. express服务启动，express与nginx关系。
 3.中途岛练习。
 4.前端与node的集成。
@@ -7,9 +7,10 @@
 7.element-UI实操
 8.数据库连接
 9.egg.js应用
-10.公众号
+10.公众号（Done）
 11.小程序
 12.mock
 13.ES10
 14.nginx配置了解
 15.OAuth2.0鉴权机制了解。
+16. 研究其他管理网站嵌套的其它网站。目前公司要做的管理网站。
