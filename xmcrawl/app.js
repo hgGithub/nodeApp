@@ -163,14 +163,12 @@ let compareValue = (source, laptop, optFlag, htyDb) => {
 
 	if(dclLength) {
 		updataData(source, laptop, optFlag, dataChangeList);
-		// console.log('dataChangeList: ', dataChangeList[0]);
 	}
 
 	if(elLength) {
 		sentMail(emailList, source); //发送email有差价数据
 	}
-	// emailList.length ? sentMail(emailList); //发送email有差价数据
-	// updataData(source, laptop, optFlag, dataChangeList);
+
 }
 
 let getCurrentData = (source, laptop, optFlag) => {
@@ -207,62 +205,61 @@ let getCurrentData = (source, laptop, optFlag) => {
 let getData = (optFlag) => {
 	var c = new Crawler({
 		maxConnections : 1,
+		jQuery: false,
 		callback: function (error, res, done) {
 			if(error) {
 				console.log(error);
 			} else {
-				mlConfig.logger.info('crawlRes: ', res);
-				let source = res.options.uri;
-				var $ = res.$;
-	            // $ 默认为 Cheerio 解析器
-	            // 它是核心jQuery的精简实现，可以按照jQuery选择器语法快速提取DOM元素
-	            let htmlRes = $('.sc-product-card');
-	            let laptop = {};
-	            // let tDebug = [];
-	            let crawlCount = 0;
-	            mlConfig.logger.info('source: ', source);
+					let source = res.options.uri;
+					// let resultsOption = JSON.parse(res.body);
+					// mlConfig.logger.info('resultsOption: ', resultsOption['payload']['records'][0]);
+					// return ;
+					let resJsonObj = JSON.parse(res.body); // 返回的JSON字符串转化为JSON对象
+					if(!resJsonObj.status) {
+						mlConfig.logger.info("爬虫结果错误");
+						return;
+					}
 
-                htmlRes.each(function(i, elem) {
-                	crawlCount = i;
-                	let name = $(this).find('.sc-product-card-title').text(), // 获取笔记本名称
-                		value = Number($(this).find('.Price-characteristic').text().replace(/[^0-9]/ig,"")); // 获取当前笔记本当前价格
-                	var	pLink = $(this).find('.sc-product-card-pdp-link').attr('href');// 获取当前笔记本链接地址
+					let resProList = resJsonObj.payload.records,
+						resProListLength = resProList.length;
+					let currentPage = resJsonObj.payload.currentPage;
 
-                	if(source.indexOf('samsclub') != -1) {
-                		pLink = 'https://www.samsclub.com' + pLink;
-                	}
+					let laptop = {};
+					for(var i = 0; i < resProListLength; i++){
+						let proDetail = resProList[i];
+						let tNameList = [];
+						let name = proDetail.productName,
+						    value = Math.floor(proDetail.onlinePricing.finalPrice.currencyAmount),
+						    pLink = '';
+						if(source.indexOf('samsclub') != -1){
+							if(currentPage === 1) {
+								pLink = 'https://www.samsclub.com' + proDetail.seoUrl + '?xid=plp_product_1_' + (i + 1);
+							} else if(currentPage === 2) {
+								pLink = 'https://www.samsclub.com' + proDetail.seoUrl + '?xid=plp_product_1_' + (i + 49);
+							}
+						}
 
-                	let tNameList = [];
-                	if(!isNaN(value)) {
-                		// laptop[name.trim()] = value - 0; //
-                		tNameList.push(value);
-                		tNameList.push(pLink);
 
-                		laptop[name.trim()] = tNameList;
-                	} else {// 调试使用
-                		// let temp = [];
-                		// temp.push(value);
-                		// temp.push(name);
-                		// tDebug.push(temp);
-                	}
-                });
+						tNameList.push(value);
+						tNameList.push(pLink);
 
-                if (source.indexOf('samsclub') != -1) {
-                	// getCurrentData('samsclub', laptop, optFlag);
-                	// mlConfig.logger.info('laptop: ', laptop);
-                	// mlConfig.logger.info('tDebug: ', tDebug);
-                	mlConfig.logger.info('crawlCount: ', crawlCount);
-                	// mlConfig.logger.info('laptopCount: ', Object.keys(laptop).length);
-                } else {
-                	// 其他网站爬到的信息
-                }
+						laptop[name.trim()] = tNameList;
+					}
+
+	                if (source.indexOf('samsclub') != -1) {
+						getCurrentData('samsclub', laptop, optFlag);
+						mlConfig.logger.info('laptopCount: ', Object.keys(laptop).length);
+	                } else {
+	                	// 其他网站爬到的信息
+	                }
+
 			}
 			done();
 			// connection.end();
 		}
 	});
 
-	c.queue(['https://www.samsclub.com/b/laptops/1117?clubId=undefined&offset=0&searchCategoryId=1117&selectedFilter=all&sortKey=relevance&sortOrder=1']);
+	c.queue(['https://www.samsclub.com/api/node/vivaldi/v1/products/search/?sourceType=1&sortKey=relevance&sortOrder=1&limit=48&searchCategoryId=1117&clubId=undefined&br=true', 'https://www.samsclub.com/api/node/vivaldi/v1/products/search/?sourceType=1&sortKey=relevance&sortOrder=1&offset=48&limit=48&searchCategoryId=1117&clubId=undefined&br=true']);
 }
 
 /*
@@ -333,7 +330,7 @@ let init = () => {
 	// getCurrentData();
 	// getData('samsclub');
 }
-init();
-// var intercal = setInterval(() => {
-// 	init();
-// }, 10800000)
+// init();
+var intercal = setInterval(() => {
+	init();
+}, 10800000)

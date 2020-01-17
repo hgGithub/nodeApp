@@ -4,23 +4,17 @@ let nodemailer = require("nodemailer");
 let smtpTransport = require('nodemailer-smtp-transport');
 let wellknown = require("nodemailer-wellknown");
 let config = wellknown("QQ");
-let mysql = require('mysql');
+// let mysql = require('mysql');
+let mlConfig = require('./config');
 
 // connect database:
 var connection = null;
 let dataBaseLink = (optFlag) => {
-	connection = mysql.createConnection({
-	  host     : '10.0.11.6',
-	  user     : 'EI_user',
-	  password : 'EI_user_11',
-	  database : 'elec_invoice_db',
-	  port : 3310,
-	  dateStrings: true
-	});
+	connection = mlConfig.creatConnect();
 
 	connection.connect((err) => {
 		if(err) throw err;
-		console.log("mysql 连接成功！");
+		mlConfig.logger.info("mysql 连接成功！");
 		getData(optFlag);
 	});
 }
@@ -60,8 +54,12 @@ let getCurrentTime = () => {
  */
 let searchRes = (string) => {
 	connection.query(string, function (error, results, fields) {
-	  if (error) throw error;
-	  console.log('mysql数据库操作成功');
+	  if (error) {
+	  	mlConfig.logger.error('error: ' + error);
+	  	throw error;
+	  }
+
+	  mlConfig.logger.info('mysql数据库操作成功');
 	});
 }
 
@@ -86,7 +84,7 @@ let updataData = (source, laptopObj, optFlag, dataList) => {
 			}
 
 		});
-		console.log('updataData initInsert str: ', udataStr);
+
 		searchRes(udataStr);
 	} else {
 		let keys = Object.keys(udataList),
@@ -156,10 +154,11 @@ let compareValue = (source, laptop, optFlag, htyDb) => {
 			}
 		}
 	}
-	console.log('emailList: ', emailList);
-	console.log('dataChangeList: ', dataChangeList);
 
-	let dclLength = Object.keys(dataChangeList);
+	mlConfig.logger.info('emailList: ', emailList);
+	mlConfig.logger.info('dataChangeList: ', dataChangeList);
+
+	let dclLength = Object.keys(dataChangeList).length;
 	let elLength = emailList['insert'].length || emailList['upd'].length;
 
 	if(dclLength) {
@@ -213,14 +212,22 @@ let getData = (optFlag) => {
 				console.log(error);
 			} else {
 				let source = res.options.uri;
+				// let resultsOption = JSON.parse(res.body);
+				// mlConfig.logger.info('resultsOption: ', resultsOption['payload']['records'][0]);
+				// return ;
 				var $ = res.$;
 	            // $ 默认为 Cheerio 解析器
+	            // 它是核心jQuery的精简实现，可以按照jQuery选择器语法快速提取DOM元素
 	            let htmlRes = $('.sc-product-card');
 	            let laptop = {};
+	            // let tDebug = [];
+	            let crawlCount = 0;
+	            mlConfig.logger.info('source: ', source);
 
                 htmlRes.each(function(i, elem) {
+                	crawlCount = i;
                 	let name = $(this).find('.sc-product-card-title').text(), // 获取笔记本名称
-                		value = Number($(this).find('.Price-characteristic').text()); // 获取当前笔记本当前价格
+                		value = Number($(this).find('.Price-characteristic').text().replace(/[^0-9]/ig,"")); // 获取当前笔记本当前价格
                 	var	pLink = $(this).find('.sc-product-card-pdp-link').attr('href');// 获取当前笔记本链接地址
 
                 	if(source.indexOf('samsclub') != -1) {
@@ -230,20 +237,34 @@ let getData = (optFlag) => {
                 	let tNameList = [];
                 	if(!isNaN(value)) {
                 		// laptop[name.trim()] = value - 0; //
-                		tNameList.push(value - 0);
+                		tNameList.push(value);
                 		tNameList.push(pLink);
 
                 		laptop[name.trim()] = tNameList;
+                	} else {// 调试使用
+                		// let temp = [];
+                		// temp.push(value);
+                		// temp.push(name);
+                		// tDebug.push(temp);
                 	}
                 });
 
                 if (source.indexOf('samsclub') != -1) {
-                	getCurrentData('samsclub', laptop, optFlag);
-                	// console.log('laptop: ', laptop);
+                	// getCurrentData('samsclub', laptop, optFlag);
+                	// mlConfig.logger.info('laptop: ', laptop);
+                	// mlConfig.logger.info('tDebug: ', tDebug);
+                	mlConfig.logger.info('crawlCount: ', crawlCount);
+                	// mlConfig.logger.info('laptopCount: ', Object.keys(laptop).length);
                 } else {
                 	// 其他网站爬到的信息
+                }
+			}
+			done();
+			// connection.end();
+		}
+	});
 
-	c.queue('https://www.samsclub.com/b/laptops/1117?xid=cat1116-comp_subcat_1_1');
+	c.queue(['https://www.samsclub.com/api/node/vivaldi/v1/products/search/?sourceType=1&sortKey=relevance&sortOrder=1&limit=48&searchCategoryId=1117&clubId=undefined&br=true']);
 }
 
 /*
@@ -286,7 +307,7 @@ let sentMail = (sendData, source) => {
 
 	let mailOptions = {
 	  from: '胡刚 <2201443105@qq.com>', // sender address
-	  to: '2201443105@qq.com', // list of receivers,Chenlayamazon1@gmail.com
+	  to: '2201443105@qq.com,Chenlayamazon1@gmail.com', // list of receivers,Chenlayamazon1@gmail.com
 	  subject: '降价提醒', // Subject line
 	  // 发送text或者html格式
 	  // text: sendStr, // plain text body
@@ -296,9 +317,10 @@ let sentMail = (sendData, source) => {
 	// send mail with defined transport object
 	transporter.sendMail(mailOptions, (error, info) => {
 	  if (error) {
-	    return console.log(error);
+	    mlConfig.logger.info('Email sent failed: ', error)
+	    throw error;
 	  }
-	  console.log('Message sent: %s', info.messageId);
+	  mlConfig.logger.info('Email sent successful!')
 	  // Message sent: <04ec7731-cc68-1ef6-303c-61b0f796b78f@qq.com>
 	});
 }
@@ -313,5 +335,7 @@ let init = () => {
 	// getCurrentData();
 	// getData('samsclub');
 }
-
 init();
+// var intercal = setInterval(() => {
+// 	init();
+// }, 10800000)
