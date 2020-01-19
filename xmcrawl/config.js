@@ -16,6 +16,7 @@ log4js.configure({
 	},
 	categories: {
 		default: {appenders: ['std'], level: 'all'},
+		proLog: {appenders: ['errorLog'], level: 'all'}
 	}
 });
 

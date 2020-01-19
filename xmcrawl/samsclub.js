@@ -1,5 +1,8 @@
 let Crawler = require('Crawler');
 
+/*
+从指定网站爬取数据
+ */
 let samsclub = (optFlag, getCurrentData) => {
 	var c = new Crawler({
 		maxConnections : 1,

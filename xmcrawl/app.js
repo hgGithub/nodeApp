@@ -7,6 +7,7 @@ let config = wellknown("QQ");
 // let mysql = require('mysql');
 let creatConnect = require('./config');
 let samsclub = require('./samsclub');
+let timingTask = require('node-schedule');
 
 // connect database:
 var connection = null;
@@ -200,70 +201,6 @@ let getCurrentData = (source, laptop, optFlag) => {
 	});
 }
 
-
-/*
-从指定网站爬取数据
- */
-let getData = (optFlag) => {
-	var c = new Crawler({
-		maxConnections : 1,
-		jQuery: false,
-		callback: function (error, res, done) {
-			if(error) {
-				console.log(error);
-			} else {
-					let source = res.options.uri;
-					// let resultsOption = JSON.parse(res.body);
-					// mlConfig.logger.info('resultsOption: ', resultsOption['payload']['records'][0]);
-					// return ;
-					let resJsonObj = JSON.parse(res.body); // 返回的JSON字符串转化为JSON对象
-					if(!resJsonObj.status) {
-						global.logger.info("爬虫结果错误");
-						return;
-					}
-
-					let resProList = resJsonObj.payload.records,
-						resProListLength = resProList.length;
-					let currentPage = resJsonObj.payload.currentPage;
-
-					let laptop = {};
-					for(var i = 0; i < resProListLength; i++){
-						let proDetail = resProList[i];
-						let tNameList = [];
-						let name = proDetail.productName,
-						    value = Math.floor(proDetail.onlinePricing.finalPrice.currencyAmount),
-						    pLink = '';
-						if(source.indexOf('samsclub') != -1){
-							if(currentPage === 1) {
-								pLink = 'https://www.samsclub.com' + proDetail.seoUrl + '?xid=plp_product_1_' + (i + 1);
-							} else if(currentPage === 2) {
-								pLink = 'https://www.samsclub.com' + proDetail.seoUrl + '?xid=plp_product_1_' + (i + 49);
-							}
-						}
-
-
-						tNameList.push(value);
-						tNameList.push(pLink);
-
-						laptop[name.trim()] = tNameList;
-					}
-
-	                if (source.indexOf('samsclub') != -1) {
-						getCurrentData('samsclub', laptop, optFlag);
-						global.logger.info('laptopCount: ', Object.keys(laptop).length);
-	                } else {
-	                	// 其他网站爬到的信息
-	                }
-
-			}
-			done();
-			// connection.end();
-		}
-	});
-
-	c.queue(['https://www.samsclub.com/api/node/vivaldi/v1/products/search/?sourceType=1&sortKey=relevance&sortOrder=1&limit=48&searchCategoryId=1117&clubId=undefined&br=true', 'https://www.samsclub.com/api/node/vivaldi/v1/products/search/?sourceType=1&sortKey=relevance&sortOrder=1&offset=48&limit=48&searchCategoryId=1117&clubId=undefined&br=true']);
-}
-
 /*
 发送邮件
  */
@@ -333,6 +270,15 @@ let init = () => {
 	// getData('samsclub');
 }
 init();
-// var intercal = setInterval(() => {
-// 	init();
-// }, 10800000)
+
+/*
+定时规则
+ */
+var rule = new timingTask.RecurrenceRule();
+rule.hour = [15, 17, 23];
+rule.minute = 0;
+rule.second = 0;
+
+var timingObj = timingTask.scheduleJob(rule, function(){
+  init();
+});
