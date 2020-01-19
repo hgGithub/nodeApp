@@ -19,7 +19,7 @@ log4js.configure({
 	}
 });
 
-var logger = log4js.getLogger('default')
+global.logger = log4js.getLogger('default')
 
 var connection = null;
 var creatConnect = () => {
@@ -49,4 +49,4 @@ var creatConnect = () => {
 	return conDb;
 }
 
-module.exports = {creatConnect, logger};
+module.exports = creatConnect;

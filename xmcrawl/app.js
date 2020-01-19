@@ -5,17 +5,19 @@ let smtpTransport = require('nodemailer-smtp-transport');
 let wellknown = require("nodemailer-wellknown");
 let config = wellknown("QQ");
 // let mysql = require('mysql');
-let mlConfig = require('./config');
+let creatConnect = require('./config');
+let samsclub = require('./samsclub');
 
 // connect database:
 var connection = null;
 let dataBaseLink = (optFlag) => {
-	connection = mlConfig.creatConnect();
+	connection = creatConnect();
 
 	connection.connect((err) => {
 		if(err) throw err;
-		mlConfig.logger.info("mysql 连接成功！");
-		getData(optFlag);
+		global.logger.info("mysql 连接成功！");
+		// getData(optFlag);
+		samsclub(optFlag, getCurrentData);
 	});
 }
 
@@ -55,11 +57,11 @@ let getCurrentTime = () => {
 let searchRes = (string) => {
 	connection.query(string, function (error, results, fields) {
 	  if (error) {
-	  	mlConfig.logger.error('error: ' + error);
+	  	global.logger.error('error: ' + error);
 	  	throw error;
 	  }
 
-	  mlConfig.logger.info('mysql数据库操作成功');
+	  global.logger.info('mysql数据库操作成功');
 	});
 }
 
@@ -155,8 +157,8 @@ let compareValue = (source, laptop, optFlag, htyDb) => {
 		}
 	}
 
-	mlConfig.logger.info('emailList: ', emailList);
-	mlConfig.logger.info('dataChangeList: ', dataChangeList);
+	global.logger.info('emailList: ', emailList);
+	global.logger.info('dataChangeList: ', dataChangeList);
 
 	let dclLength = Object.keys(dataChangeList).length;
 	let elLength = emailList['insert'].length || emailList['upd'].length;
@@ -216,7 +218,7 @@ let getData = (optFlag) => {
 					// return ;
 					let resJsonObj = JSON.parse(res.body); // 返回的JSON字符串转化为JSON对象
 					if(!resJsonObj.status) {
-						mlConfig.logger.info("爬虫结果错误");
+						global.logger.info("爬虫结果错误");
 						return;
 					}
 
@@ -248,7 +250,7 @@ let getData = (optFlag) => {
 
 	                if (source.indexOf('samsclub') != -1) {
 						getCurrentData('samsclub', laptop, optFlag);
-						mlConfig.logger.info('laptopCount: ', Object.keys(laptop).length);
+						global.logger.info('laptopCount: ', Object.keys(laptop).length);
 	                } else {
 	                	// 其他网站爬到的信息
 	                }
@@ -302,7 +304,7 @@ let sentMail = (sendData, source) => {
 
 	let mailOptions = {
 	  from: '胡刚 <2201443105@qq.com>', // sender address
-	  to: '2201443105@qq.com,Chenlayamazon1@gmail.com', // list of receivers,Chenlayamazon1@gmail.com
+	  to: '2201443105@qq.com', // list of receivers,Chenlayamazon1@gmail.com
 	  subject: '降价提醒', // Subject line
 	  // 发送text或者html格式
 	  // text: sendStr, // plain text body
@@ -312,10 +314,10 @@ let sentMail = (sendData, source) => {
 	// send mail with defined transport object
 	transporter.sendMail(mailOptions, (error, info) => {
 	  if (error) {
-	    mlConfig.logger.info('Email sent failed: ', error)
+	    global.logger.info('Email sent failed: ', error)
 	    throw error;
 	  }
-	  mlConfig.logger.info('Email sent successful!')
+	  global.logger.info('Email sent successful!')
 	  // Message sent: <04ec7731-cc68-1ef6-303c-61b0f796b78f@qq.com>
 	});
 }
@@ -330,7 +332,7 @@ let init = () => {
 	// getCurrentData();
 	// getData('samsclub');
 }
-// init();
-var intercal = setInterval(() => {
-	init();
-}, 10800000)
+init();
+// var intercal = setInterval(() => {
+// 	init();
+// }, 10800000)
