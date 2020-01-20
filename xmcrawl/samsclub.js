@@ -1,4 +1,4 @@
-let Crawler = require('Crawler');
+let Crawler = require('crawler');
 
 /*
 从指定网站爬取数据

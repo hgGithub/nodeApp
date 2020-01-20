@@ -1,23 +1,20 @@
 let https = require('https');
-let Crawler = require('Crawler');
 let nodemailer = require("nodemailer");
 let smtpTransport = require('nodemailer-smtp-transport');
 let wellknown = require("nodemailer-wellknown");
 let config = wellknown("QQ");
 // let mysql = require('mysql');
-let creatConnect = require('./config');
+let mysqlConnect = require('./config');
 let samsclub = require('./samsclub');
 let timingTask = require('node-schedule');
 
 // connect database:
 var connection = null;
 let dataBaseLink = (optFlag) => {
-	connection = creatConnect();
-
+	connection = mysqlConnect();
 	connection.connect((err) => {
 		if(err) throw err;
 		global.logger.info("mysql 连接成功！");
-		// getData(optFlag);
 		samsclub(optFlag, getCurrentData);
 	});
 }
@@ -114,6 +111,7 @@ let compareValue = (source, laptop, optFlag, htyDb) => {
 		updataData(source, laptop, optFlag, {});
 		return;
 	}
+
 	let laptopObj = laptop;
 	let ltNameList = Object.keys(laptopObj), // 笔记本电脑名字
 	 	length = ltNameList.length;
@@ -170,6 +168,8 @@ let compareValue = (source, laptop, optFlag, htyDb) => {
 
 	if(elLength) {
 		sentMail(emailList, source); //发送email有差价数据
+	} else {
+		global.logger.info('本次数据无更新。', new Date().toLocaleString());
 	}
 
 }
@@ -241,7 +241,7 @@ let sentMail = (sendData, source) => {
 
 	let mailOptions = {
 	  from: '胡刚 <2201443105@qq.com>', // sender address
-	  to: '2201443105@qq.com', // list of receivers,Chenlayamazon1@gmail.com
+	  to: '2201443105@qq.com,Chenlayamazon1@gmail.com', // list of receivers,Chenlayamazon1@gmail.com
 	  subject: '降价提醒', // Subject line
 	  // 发送text或者html格式
 	  // text: sendStr, // plain text body
@@ -254,7 +254,11 @@ let sentMail = (sendData, source) => {
 	    global.logger.info('Email sent failed: ', error)
 	    throw error;
 	  }
-	  global.logger.info('Email sent successful!')
+
+	  if (newAddLength || lowLength) {
+	  	global.logger.info('Email sent successful!')
+	  }
+	  
 	  // Message sent: <04ec7731-cc68-1ef6-303c-61b0f796b78f@qq.com>
 	});
 }
@@ -269,7 +273,7 @@ let init = () => {
 	// getCurrentData();
 	// getData('samsclub');
 }
-init();
+// init();
 
 /*
 定时规则
