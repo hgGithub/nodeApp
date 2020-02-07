@@ -11,7 +11,7 @@ log4js.configure({
 	appenders: {
 		std: {type: 'console'},
 		// httpLog: { type: "dateFile", filename: logPath + 'info.log', pattern: 'yyyyMMdd', alwaysIncludePattern: true, keepFileExt: true, flags: 'a'},
-		infolog: {type: 'dateFile', filename: logPath + 'info.log', pattern: 'yyyyMMdd', alwaysIncludePattern: true, keepFileExt: true, flags: 'a'},
+		infolog: {type: 'dateFile', filename: logPath + 'info.log', pattern: '.yyyy-MM-dd', daysToKeep: 7}
 		// error: {type: "logLevelFilter", level: "error", appender: 'errorLog'}
 
 	},
@@ -24,7 +24,7 @@ log4js.configure({
 if(env === 'production') {
 	global.logger = log4js.getLogger('proLog');
 } else {
-	global.logger = log4js.getLogger('default')
+	global.logger = log4js.getLogger('default');
 }
 
 
@@ -53,5 +53,11 @@ var creatConnect = () => {
 
 	return conDb;
 }
+
+process.on('uncaughtException', function (err) { // 捕获进程错误
+
+  global.logger.error(err);
+  global.logger.error(err.stack);
+});
 
 module.exports = creatConnect;
