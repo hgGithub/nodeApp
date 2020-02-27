@@ -42,11 +42,11 @@ var creatConnect = () => {
 		});
 	} else {
 		conDb = mysql.createConnection({
-		  host     : '10.0.11.6',
+		  host     : '10.0.11.125',
 		  user     : 'EI_user',
 		  password : 'EI_user_11',
 		  database : 'elec_invoice_db',
-		  port : 3310,
+		  port : 30073,
 		  dateStrings: true
 		});
 	}
