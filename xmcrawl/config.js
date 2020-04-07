@@ -35,8 +35,8 @@ var creatConnect = () => {
 		conDb = mysql.createConnection({
 		  host     : 'localhost',
 		  user     : 'root',
-		  password : 'root',
-		  database : 'myself_db',
+		  password : 'hgmysql',
+		  database : 'laptops_db',
 		  port : 3306,
 		  dateStrings: true
 		});
@@ -56,8 +56,8 @@ var creatConnect = () => {
 
 process.on('uncaughtException', function (err) { // 捕获进程错误
 
-  global.logger.error(err);
-  global.logger.error(err.stack);
+  global.logger.error('node 进程错误： ', err);
+  global.logger.error('node 进程错误： ', err.stack);
 });
 
 module.exports = creatConnect;

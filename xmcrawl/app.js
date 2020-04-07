@@ -11,17 +11,9 @@ let timingTask = require('node-schedule');
 
 // connect database:
 var connection = null;
-var dataBaseLink = (optFlag) => {
-	connection = mysqlConnect();
-	connection.connect((err) => {
-		if(err) throw err;
-		global.logger.info("mysql 连接成功！");
-		walmart(optFlag, getCurrentData);
-		samsclub(optFlag, getCurrentData);
-	});
 
-	connection.on('error', function(err) {
-        global.logger.error('db error', err);
+var dataBaseHandleError = (err) => {
+	if (err) {
         if(err.code === 'PROTOCOL_CONNECTION_LOST') {
             global.logger.error('db error执行重连:'+err.message);
             dataBaseLink();
@@ -29,7 +21,27 @@ var dataBaseLink = (optFlag) => {
         	global.logger.error('数据库抛错误异常： '+err.message);
             throw err;
         }
-    });
+	} else {
+		global.logger.info("mysql 连接成功！");
+	}
+
+}
+
+var dataBaseLink = () => {
+	if (connection !== null) {
+		connection.destroy();
+		connection = null;
+	}
+
+	connection = mysqlConnect();
+	connection.connect(dataBaseHandleError);
+	connection.on('error', dataBaseHandleError);
+}
+
+var dataCrawl = (optFlag) => {
+	// global.logger.info("数据库连接异步： ", connection.state);
+	walmart(optFlag, getCurrentData);
+	samsclub(optFlag, getCurrentData);
 }
 
 /*
@@ -68,11 +80,19 @@ let getCurrentTime = () => {
 let searchRes = (string) => {
 	connection.query(string, function (error, results, fields) {
 	  if (error) {
-	  	global.logger.error('error: ' + error);
+	  	global.logger.error('当前数据库操作失败: ' + error);
 	  	throw error;
 	  }
 
-	  global.logger.info('mysql数据库操作成功');
+	  if (results) {
+		  if(string.indexOf('DELETE') != -1) {
+			global.logger.info('mysql数据库delete操作成功');
+		  } else if(string.indexOf('DUPLICATE') != -1){
+		  	global.logger.info('mysql数据库insert/update操作成功');
+		  } else {
+		  	global.logger.info('mysql数据库insert操作成功');
+		  }
+	  }
 	});
 }
 
@@ -327,13 +347,34 @@ let sentMail = (sendData, source) => {
 dataBaseLink();有数据基础上执行更新。
 dataBaseLink("initInsert");第一次爬，执行插入。
  */
+
+
 var init = () => {
 	dataBaseLink();
+
+	let checkDataLinkState = () => {
+		setTimeout(() => {
+			if(connection && connection.state === 'authenticated') {
+				dataCrawl();
+			} else {
+				checkDataLinkState();
+			}
+		}, 1000);
+	}
+
+	checkDataLinkState();
 	// dataBaseLink("initInsert");
 	// getCurrentData();
 	// getData('samsclub');
 }
-// init();
+
+let env  = process.env.NODE_ENV || 'development';
+if(env === 'production') {
+	dataBaseLink();
+} else {
+	init();
+}
+
 
 /*
 定时规则
@@ -344,5 +385,5 @@ rule.minute = 0;
 rule.second = 0;
 
 var timingObj = timingTask.scheduleJob(rule, function(){
-  init();
+  dataCrawl();
 });
