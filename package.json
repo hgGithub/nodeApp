@@ -31,6 +31,6 @@
     "crawler": "^1.2.1",
     "ejs-loader": "^0.3.3",
     "jstransformer": "^1.0.0",
-    "pug": "^2.0.4"
+    "pug": "^3.0.1"
   }
 }
